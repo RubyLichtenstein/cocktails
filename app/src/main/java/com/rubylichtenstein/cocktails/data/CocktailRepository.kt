@@ -1,5 +1,7 @@
 package com.rubylichtenstein.cocktails.data
 
+import com.rubylichtenstein.cocktails.data.model.Cocktail
+import com.rubylichtenstein.cocktails.data.model.CocktailDetails
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -40,7 +42,7 @@ class CocktailRepository(
         }
     }
 
-    suspend fun getCocktailDetails(cocktailId: String): List<CocktailDetail> {
+    suspend fun getCocktailDetails(cocktailId: String): List<CocktailDetails> {
         return withContext(Dispatchers.IO) {
             val response = api.getCocktailDetails(cocktailId)
             if (response.isSuccessful) {

@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
-import com.rubylichtenstein.cocktails.data.Cocktail
+import com.rubylichtenstein.cocktails.data.model.Cocktail
 import com.rubylichtenstein.cocktails.ui.UiState
 import com.rubylichtenstein.cocktails.ui.navigateToDetails
 import com.valentinilk.shimmer.shimmer
@@ -66,12 +66,10 @@ fun CocktailsScreen(
             )
         }
     ) { paddingValues ->
-        // Fetch and observe cocktails by category
         LaunchedEffect(category) {
             viewModel.fetchCocktailsByCategory(category)
         }
 
-        // Display UI based on the state with padding
         Box(modifier = Modifier.padding(paddingValues)) {
             when (val cocktailsState = viewModel.cocktailsByCategory.collectAsState().value) {
                 is UiState.Loading -> LoadingView()
@@ -145,11 +143,6 @@ fun CocktailItem(cocktail: Cocktail, navController: NavController) {
                     }
                 )
             }
-//            Image(
-//                painter = rememberImagePainter(cocktail.strDrinkThumb),
-//                contentDescription = null,
-//                modifier = Modifier.size(60.dp)
-//            )
         },
         trailingContent = {
             IconButton(onClick = { /* Handle add to favorites */ }) {
@@ -160,26 +153,4 @@ fun CocktailItem(cocktail: Cocktail, navController: NavController) {
             }
         }
     )
-    // Implementation of the UI for a single cocktail item
-//    Card(
-//        modifier = Modifier
-//            .clickable {
-//                navController.navigate("cocktailDetails/${cocktail.idDrink}")
-//            }
-//            .fillMaxWidth()
-//            .padding(8.dp),
-//    ) {
-//        Row(verticalAlignment = Alignment.CenterVertically) {
-//            // Display thumbnail if available
-//            cocktail.strDrinkThumb?.let { url ->
-//                Image(
-//                    painter = rememberImagePainter(url),
-//                    contentDescription = null,
-//                    modifier = Modifier.size(60.dp)
-//                )
-//            }
-//            Spacer(Modifier.width(8.dp))
-//            Text(cocktail.strDrink)
-//        }
-//    }
 }

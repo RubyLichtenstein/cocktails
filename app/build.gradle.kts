@@ -52,6 +52,7 @@ android {
 }
 
 val hiltVersion: String by project
+val roomVersion: String by project
 
 dependencies {
 
@@ -87,4 +88,8 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
 
     implementation("com.valentinilk.shimmer:compose-shimmer:1.2.0")
+
+    implementation("androidx.room:room-runtime:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
 }

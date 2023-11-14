@@ -2,8 +2,8 @@ package com.rubylichtenstein.cocktails.ui.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rubylichtenstein.cocktails.data.Cocktail
 import com.rubylichtenstein.cocktails.data.CocktailRepository
+import com.rubylichtenstein.cocktails.data.model.Cocktail
 import com.rubylichtenstein.cocktails.ui.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

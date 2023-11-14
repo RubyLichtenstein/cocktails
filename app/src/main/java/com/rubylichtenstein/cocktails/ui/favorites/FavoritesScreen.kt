@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
 package com.rubylichtenstein.cocktails.ui.favorites
 
@@ -15,18 +15,14 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.rubylichtenstein.cocktails.ui.UiState
-import com.rubylichtenstein.cocktails.ui.categories.CategoriesList
-import com.rubylichtenstein.cocktails.ui.categories.CategoriesViewModel
-import com.rubylichtenstein.cocktails.ui.categories.ErrorView
-import com.rubylichtenstein.cocktails.ui.categories.LoadingView
+import com.rubylichtenstein.cocktails.ui.cocktails.CocktailList
 
 @Composable
 fun FavoritesScreen(
     navController: NavController,
-    viewModel: CategoriesViewModel = hiltViewModel()
+    viewModel: FavoritesViewModel = hiltViewModel()
 ) {
-    val categoriesState = viewModel.categories.collectAsStateWithLifecycle()
+    val favorites = viewModel.favoriteCocktails.collectAsStateWithLifecycle()
 
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
@@ -40,7 +36,11 @@ fun FavoritesScreen(
         }
     ) {
         Box(modifier = Modifier.padding(it)) {
-//            when (val state = categoriesState.value) {
+            CocktailList(
+                cocktails = favorites.value,
+                navController = navController
+            )
+//            when (val state = favorites.value) {
 //                is UiState.Loading -> LoadingView()
 //                is UiState.Success -> CategoriesList(
 //                    categories = state.data,
