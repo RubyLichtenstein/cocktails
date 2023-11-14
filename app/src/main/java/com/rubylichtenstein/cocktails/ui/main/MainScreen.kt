@@ -17,7 +17,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.rubylichtenstein.cocktails.ui.AppNavigation
 import com.rubylichtenstein.cocktails.ui.favorites.FavoriteCountBadge
-import com.rubylichtenstein.cocktails.ui.search.SearchCocktailScreen
 
 @Composable
 fun MainAppScreen(navController: NavHostController) {

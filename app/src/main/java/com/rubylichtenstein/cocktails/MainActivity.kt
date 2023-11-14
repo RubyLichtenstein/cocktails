@@ -8,7 +8,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.rubylichtenstein.cocktails.ui.AppNavigation
 import com.rubylichtenstein.cocktails.ui.main.MainAppScreen
 import com.rubylichtenstein.cocktails.ui.theme.CocktailsTheme
 import dagger.hilt.android.AndroidEntryPoint

@@ -1,4 +1,4 @@
-package com.rubylichtenstein.cocktails.data
+package com.rubylichtenstein.cocktails.data.api
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

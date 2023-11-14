@@ -1,5 +1,8 @@
-package com.rubylichtenstein.cocktails.data
+package com.rubylichtenstein.cocktails.data.api
 
+import com.rubylichtenstein.cocktails.data.CocktailDetailResponse
+import com.rubylichtenstein.cocktails.data.CocktailResponse
+import com.rubylichtenstein.cocktails.data.DrinksResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query

@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,7 +40,7 @@ import com.valentinilk.shimmer.shimmer
 fun CocktailsScreen(
     category: String,
     navController: NavController,
-    viewModel: CocktailViewModel = hiltViewModel()
+    viewModel: CocktailsViewModel = hiltViewModel()
 ) {
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
@@ -81,10 +82,17 @@ fun CocktailsScreen(
 }
 
 @Composable
-fun CocktailList(cocktails: List<Cocktail>, navController: NavController) {
+fun CocktailList(
+    cocktails: List<Cocktail>,
+    navController: NavController
+) {
     LazyColumn {
         items(cocktails) { cocktail ->
-            CocktailItem(cocktail, navController)
+            CocktailItem(cocktail, {
+                navController.navigateToDetails(cocktail.idDrink)
+            }, {
+
+            })
         }
     }
 }
@@ -104,11 +112,13 @@ fun ErrorView(errorMessage: String) {
 }
 
 @Composable
-fun CocktailItem(cocktail: Cocktail, navController: NavController) {
+fun CocktailItem(
+    cocktail: Cocktail,
+    onClick: () -> Unit,
+    onToggleFavorite: () -> Unit,
+) {
     ListItem(
-        modifier = Modifier.clickable {
-            navController.navigateToDetails(cocktail.idDrink)
-        },
+        modifier = Modifier.clickable { onClick() },
         headlineContent = {
             Text(
                 text = cocktail.strDrink,
@@ -145,9 +155,14 @@ fun CocktailItem(cocktail: Cocktail, navController: NavController) {
             }
         },
         trailingContent = {
-            IconButton(onClick = { /* Handle add to favorites */ }) {
+            IconButton(onClick = {
+                onToggleFavorite()
+            }) {
                 Icon(
-                    imageVector = Icons.Filled.Favorite,
+                    imageVector = if (cocktail.isFavorite)
+                        Icons.Filled.Favorite
+                    else
+                        Icons.Outlined.Favorite,
                     contentDescription = "Back",
                 )
             }

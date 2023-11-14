@@ -2,8 +2,8 @@ package com.rubylichtenstein.cocktails
 
 import android.content.Context
 import com.rubylichtenstein.cocktails.data.CocktailRepository
-import com.rubylichtenstein.cocktails.data.RetrofitClient.theCocktailDbService
-import com.rubylichtenstein.cocktails.data.TheCocktailDbService
+import com.rubylichtenstein.cocktails.data.api.RetrofitClient.theCocktailDbService
+import com.rubylichtenstein.cocktails.data.api.TheCocktailDbService
 import com.rubylichtenstein.cocktails.data.room.AppDatabase
 import com.rubylichtenstein.cocktails.data.room.FavoriteCocktailsDao
 import dagger.Module

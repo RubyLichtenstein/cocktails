@@ -7,7 +7,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.rubylichtenstein.cocktails.ui.categories.CategoriesScreen
 import com.rubylichtenstein.cocktails.ui.cocktails.CocktailsScreen

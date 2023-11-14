@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CocktailViewModel @Inject constructor(
+class CocktailsViewModel @Inject constructor(
     private val repository: CocktailRepository
 ) : ViewModel() {
 

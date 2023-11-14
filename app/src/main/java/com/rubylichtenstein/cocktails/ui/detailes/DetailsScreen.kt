@@ -31,13 +31,13 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.rubylichtenstein.cocktails.data.model.CocktailDetails
 import com.rubylichtenstein.cocktails.ui.UiState
-import com.rubylichtenstein.cocktails.ui.cocktails.CocktailViewModel
+import com.rubylichtenstein.cocktails.ui.cocktails.CocktailsViewModel
 
 @Composable
 fun DetailsScreen(
     cocktailId: String,
     navController: NavController,
-    viewModel: CocktailViewModel = hiltViewModel()
+    viewModel: CocktailsViewModel = hiltViewModel()
 ) {
     val cocktailDetails = viewModel.cocktailDetails.collectAsState().value
 
