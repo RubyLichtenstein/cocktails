@@ -5,10 +5,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import com.rubylichtenstein.cocktails.data.model.Cocktail
@@ -72,9 +75,15 @@ fun CocktailsScreen(
         }
 
         Box(modifier = Modifier.padding(paddingValues)) {
-            when (val cocktailsState = viewModel.cocktailsByCategory.collectAsState().value) {
+            when (val cocktailsState = viewModel.cocktailsByCategory.collectAsStateWithLifecycle().value) {
                 is UiState.Loading -> LoadingView()
-                is UiState.Success -> CocktailList(cocktailsState.data, navController)
+                is UiState.Success -> CocktailList(
+                    cocktailsState.data,
+                    {
+                        viewModel.updateFavoriteStatus(it)
+                    }, navController
+                )
+
                 is UiState.Error -> ErrorView(cocktailsState.message)
             }
         }
@@ -84,14 +93,19 @@ fun CocktailsScreen(
 @Composable
 fun CocktailList(
     cocktails: List<Cocktail>,
+    onToggleFavorite: (Cocktail) -> Unit,
     navController: NavController
 ) {
-    LazyColumn {
+    val listState = rememberLazyListState()
+
+    LazyColumn(
+        state = listState,
+    ) {
         items(cocktails) { cocktail ->
             CocktailItem(cocktail, {
                 navController.navigateToDetails(cocktail.idDrink)
             }, {
-
+                onToggleFavorite(cocktail)
             })
         }
     }
@@ -160,9 +174,9 @@ fun CocktailItem(
             }) {
                 Icon(
                     imageVector = if (cocktail.isFavorite)
-                        Icons.Filled.Favorite
+                        Icons.Outlined.Favorite
                     else
-                        Icons.Outlined.Favorite,
+                        Icons.Outlined.FavoriteBorder,
                     contentDescription = "Back",
                 )
             }

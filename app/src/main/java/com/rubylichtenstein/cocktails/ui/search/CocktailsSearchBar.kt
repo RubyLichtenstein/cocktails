@@ -2,16 +2,12 @@
 
 package com.rubylichtenstein.cocktails.ui.search
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,15 +15,14 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rubylichtenstein.cocktails.ui.UiState
 import com.rubylichtenstein.cocktails.ui.cocktails.CocktailList
@@ -36,8 +31,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun SearchCocktailScreen(
+fun CocktailsSearchBar(
     navController: NavController,
+    searchFavorites: Boolean,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -53,7 +49,7 @@ fun SearchCocktailScreen(
             searchJob?.cancel()
             searchJob = coroutineScope.launch {
                 delay(500)  // Debounce time in milliseconds
-                viewModel.searchCocktails(searchQuery)
+                viewModel.searchCocktails(searchQuery, searchFavorites)
             }
         },
         leadingIcon = {
@@ -92,17 +88,28 @@ fun SearchCocktailScreen(
                 }
             }
         },
-        onSearch = { viewModel.searchCocktails(it) },
+        onSearch = { viewModel.searchCocktails(it, searchFavorites) },
         active = isActive,
         onActiveChange = { isActive = it },
-        placeholder = { Text("Search Cocktails") }
+        placeholder = {
+            if (searchFavorites) {
+                Text("Search Favorites")
+            } else {
+                Text("Search Cocktails")
+            }
+        }
     ) {
-        when (val result = viewModel.searchResults.collectAsState().value) {
+        when (val result = viewModel.searchResults.collectAsStateWithLifecycle().value) {
             is UiState.Loading -> Box(Modifier.fillMaxWidth()) {
                 LinearProgressIndicator()
             }
 
-            is UiState.Success -> CocktailList(result.data, navController)
+            is UiState.Success -> CocktailList(
+                result.data, {
+                    viewModel.updateFavoriteStatus(it)
+                }, navController
+            )
+
             is UiState.Error -> Text("Error: ${result.message}")
         }
     }

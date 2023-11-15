@@ -12,7 +12,6 @@ import com.rubylichtenstein.cocktails.ui.categories.CategoriesScreen
 import com.rubylichtenstein.cocktails.ui.cocktails.CocktailsScreen
 import com.rubylichtenstein.cocktails.ui.detailes.DetailsScreen
 import com.rubylichtenstein.cocktails.ui.favorites.FavoritesScreen
-import com.rubylichtenstein.cocktails.ui.search.SearchCocktailScreen
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
@@ -21,13 +20,10 @@ fun AppNavigation(navController: NavHostController) {
             CategoriesScreen(navController)
         }
 
-        composable("search") {
-            SearchCocktailScreen(navController)
-        }
-
         composable("favorites") {
             FavoritesScreen(navController)
         }
+
         composable(
             "cocktails/{category}",
             arguments = listOf(navArgument("category") { type = NavType.StringType })
@@ -36,6 +32,7 @@ fun AppNavigation(navController: NavHostController) {
                 ?: return@composable
             CocktailsScreen(category, navController)
         }
+
         composable(
             "details/{cocktailId}",
             arguments = listOf(navArgument("cocktailId") { type = NavType.StringType })

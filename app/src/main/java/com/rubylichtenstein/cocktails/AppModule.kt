@@ -1,9 +1,10 @@
 package com.rubylichtenstein.cocktails
 
 import android.content.Context
-import com.rubylichtenstein.cocktails.data.CocktailRepository
+import com.rubylichtenstein.cocktails.data.api.CocktailsApi
 import com.rubylichtenstein.cocktails.data.api.RetrofitClient.theCocktailDbService
 import com.rubylichtenstein.cocktails.data.api.TheCocktailDbService
+import com.rubylichtenstein.cocktails.data.repository.CocktailsRepository
 import com.rubylichtenstein.cocktails.data.room.AppDatabase
 import com.rubylichtenstein.cocktails.data.room.FavoriteCocktailsDao
 import dagger.Module
@@ -23,8 +24,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideCocktailRepository(theCocktailDbService: TheCocktailDbService): CocktailRepository =
-        CocktailRepository(theCocktailDbService)
+    fun provideCocktailRepository(theCocktailDbService: TheCocktailDbService): CocktailsApi =
+        CocktailsApi(theCocktailDbService)
 
     @Provides
     @Singleton
@@ -37,4 +38,11 @@ object AppModule {
     fun provideFavoriteCocktailsDao(database: AppDatabase): FavoriteCocktailsDao {
         return database.favoriteCocktailsDao()
     }
+
+    @Provides
+    @Singleton
+    fun provideCocktailsRepository(
+        cocktailsApi: CocktailsApi,
+        favoriteCocktailsDao: FavoriteCocktailsDao
+    ): CocktailsRepository = CocktailsRepository(cocktailsApi, favoriteCocktailsDao)
 }

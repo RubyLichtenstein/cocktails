@@ -1,18 +1,18 @@
-package com.rubylichtenstein.cocktails.data
+package com.rubylichtenstein.cocktails.data.api
 
-import com.rubylichtenstein.cocktails.data.api.TheCocktailDbService
+import com.rubylichtenstein.cocktails.data.DrinkCategory
 import com.rubylichtenstein.cocktails.data.model.Cocktail
 import com.rubylichtenstein.cocktails.data.model.CocktailDetails
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class CocktailRepository(
-    private val api: TheCocktailDbService
+class CocktailsApi(
+    private val service: TheCocktailDbService
 ) {
 
     suspend fun searchCocktails(searchTerm: String): List<Cocktail> {
         return withContext(Dispatchers.IO) {
-            val response = api.searchCocktails(searchTerm)
+            val response = service.searchCocktails(searchTerm)
             if (response.isSuccessful) {
                 response.body()?.drinks.orEmpty()
             } else {
@@ -23,7 +23,7 @@ class CocktailRepository(
 
     suspend fun getCocktailCategories(): List<DrinkCategory> {
         return withContext(Dispatchers.IO) {
-            val response = api.getCocktailCategories()
+            val response = service.getCocktailCategories()
             if (response.isSuccessful) {
                 response.body()?.drinks.orEmpty()
             } else {
@@ -34,7 +34,7 @@ class CocktailRepository(
 
     suspend fun getCocktailsByCategory(category: String): List<Cocktail> {
         return withContext(Dispatchers.IO) {
-            val response = api.getCocktailsByCategory(category)
+            val response = service.getCocktailsByCategory(category)
             if (response.isSuccessful) {
                 response.body()?.drinks.orEmpty()
             } else {
@@ -45,7 +45,7 @@ class CocktailRepository(
 
     suspend fun getCocktailDetails(cocktailId: String): List<CocktailDetails> {
         return withContext(Dispatchers.IO) {
-            val response = api.getCocktailDetails(cocktailId)
+            val response = service.getCocktailDetails(cocktailId)
             if (response.isSuccessful) {
                 response.body()?.drinks.orEmpty()
             } else {

@@ -21,12 +21,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.rubylichtenstein.cocktails.data.model.CocktailDetails
@@ -39,7 +39,7 @@ fun DetailsScreen(
     navController: NavController,
     viewModel: CocktailsViewModel = hiltViewModel()
 ) {
-    val cocktailDetails = viewModel.cocktailDetails.collectAsState().value
+    val cocktailDetails = viewModel.cocktailDetails.collectAsStateWithLifecycle().value
 
     LaunchedEffect(cocktailId) {
         viewModel.fetchCocktailDetails(cocktailId)

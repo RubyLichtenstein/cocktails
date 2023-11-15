@@ -2,20 +2,22 @@ package com.rubylichtenstein.cocktails.ui.cocktails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rubylichtenstein.cocktails.ui.UiState
-import com.rubylichtenstein.cocktails.data.CocktailRepository
 import com.rubylichtenstein.cocktails.data.model.Cocktail
 import com.rubylichtenstein.cocktails.data.model.CocktailDetails
+import com.rubylichtenstein.cocktails.data.repository.CocktailsRepository
+import com.rubylichtenstein.cocktails.ui.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CocktailsViewModel @Inject constructor(
-    private val repository: CocktailRepository
+    private val repository: CocktailsRepository
 ) : ViewModel() {
 
     private val _cocktailsByCategory = MutableStateFlow<UiState<List<Cocktail>>>(UiState.Loading)
@@ -25,8 +27,9 @@ class CocktailsViewModel @Inject constructor(
         viewModelScope.launch {
             _cocktailsByCategory.value = UiState.Loading
             try {
-                val cocktails = repository.getCocktailsByCategory(category)
-                _cocktailsByCategory.value = UiState.Success(cocktails)
+                repository.getCocktailsByCategory(category).collect {
+                    _cocktailsByCategory.value = UiState.Success(it)
+                }
             } catch (e: Exception) {
                 _cocktailsByCategory.value = UiState.Error(e.toString())
             }
@@ -40,11 +43,24 @@ class CocktailsViewModel @Inject constructor(
         viewModelScope.launch {
             _cocktailDetails.value = UiState.Loading
             try {
-                val details = repository.getCocktailDetails(cocktailId)
-                _cocktailDetails.value = UiState.Success(details.first())
+                repository.getCocktailDetails(cocktailId).collect {
+                    _cocktailDetails.value = UiState.Success(it)
+                }
             } catch (e: Exception) {
                 _cocktailDetails.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
+
+    fun updateFavoriteStatus(cocktail: Cocktail) {
+        viewModelScope.launch {
+            repository.updateFavoriteStatus(cocktail, !cocktail.isFavorite)
+        }
+    }
+
+    val favoriteCocktails: StateFlow<List<Cocktail>> = repository.getFavoriteCocktails().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 }

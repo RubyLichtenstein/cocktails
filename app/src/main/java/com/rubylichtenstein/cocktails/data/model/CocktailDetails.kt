@@ -55,5 +55,6 @@ data class CocktailDetails(
     val strImageSource: String?,
     val strImageAttribution: String?,
     val strCreativeCommonsConfirmed: String?,
-    val dateModified: String?
+    val dateModified: String?,
+    val isFavorite: Boolean = false
 )

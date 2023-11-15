@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
+//TODO remove?
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
     private val favoriteCocktailsDao: FavoriteCocktailsDao
@@ -26,12 +28,6 @@ class FavoritesViewModel @Inject constructor(
             favoriteCocktailsDao.getAllFavorites().collect {
                 _favoriteCocktails.value = it
             }
-        }
-    }
-
-    fun addFavorite(cocktail: Cocktail) {
-        viewModelScope.launch {
-            favoriteCocktailsDao.addFavorite(cocktail)
         }
     }
 }

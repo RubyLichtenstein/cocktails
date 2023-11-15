@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -19,7 +18,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,7 +26,7 @@ import androidx.navigation.NavController
 import com.rubylichtenstein.cocktails.ui.UiState
 import com.rubylichtenstein.cocktails.data.DrinkCategory
 import com.rubylichtenstein.cocktails.ui.navigateToCocktails
-import com.rubylichtenstein.cocktails.ui.search.SearchCocktailScreen
+import com.rubylichtenstein.cocktails.ui.search.CocktailsSearchBar
 
 
 @Composable
@@ -43,7 +41,7 @@ fun CategoriesScreen(
 
     Scaffold(
         topBar = {
-            SearchCocktailScreen(navController = navController)
+            CocktailsSearchBar(navController = navController, searchFavorites = false)
             TopAppBar(
                 title = { Text("Categories") },
                 scrollBehavior = scrollBehavior,
@@ -54,7 +52,6 @@ fun CategoriesScreen(
             when (val state = categoriesState.value) {
                 is UiState.Loading -> LoadingView()
                 is UiState.Success -> Column {
-//                    SearchCocktailScreen(navController = navController)
                     CategoriesList(
                         categories = state.data,
                         navController = navController
