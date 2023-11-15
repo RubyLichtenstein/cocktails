@@ -2,14 +2,19 @@
 
 package com.rubylichtenstein.cocktails.ui.categories
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
@@ -20,13 +25,16 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.rubylichtenstein.cocktails.ui.UiState
 import com.rubylichtenstein.cocktails.data.DrinkCategory
+import com.rubylichtenstein.cocktails.ui.UiState
 import com.rubylichtenstein.cocktails.ui.navigateToCocktails
 import com.rubylichtenstein.cocktails.ui.search.CocktailsSearchBar
+import com.valentinilk.shimmer.shimmer
 
 
 @Composable
@@ -41,11 +49,18 @@ fun CategoriesScreen(
 
     Scaffold(
         topBar = {
-            CocktailsSearchBar(navController = navController, searchFavorites = false)
-            TopAppBar(
-                title = { Text("Categories") },
-                scrollBehavior = scrollBehavior,
-            )
+            Column {
+                CocktailsSearchBar(
+                    navController = navController,
+                    searchFavorites = false
+                )
+                TopAppBar(
+                    title = {
+                        Text("Categories")
+                    },
+                    scrollBehavior = scrollBehavior,
+                )
+            }
         }
     ) {
         Box(modifier = Modifier.padding(it)) {
@@ -58,7 +73,12 @@ fun CategoriesScreen(
                     )
                 }
 
-                is UiState.Error -> ErrorView(errorMsg = state.message)
+                is UiState.Error -> ErrorView(
+                    errorMsg = "Sorry we cant show you content, please retry :)",//state.message ?: "Error",
+                    onRetry = { viewModel.fetchCocktailCategories() }
+                )
+
+                is UiState.Empty -> TODO()
             }
         }
     }
@@ -79,16 +99,35 @@ fun CategoriesList(categories: List<DrinkCategory>, navController: NavController
 }
 
 @Composable
-fun LoadingView() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
+fun ErrorView(errorMsg: String, onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = errorMsg, color = Color.Red)
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(onClick = onRetry) {
+            Text("Retry")
+        }
     }
 }
 
 @Composable
-fun ErrorView(errorMsg: String?) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "Error: $errorMsg")
+fun LoadingView() {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        items(3) {
+            ListItem(
+                headlineContent = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .shimmer()
+                            .background(Color.Gray)
+                    )
+                },
+            )
+        }
     }
 }
-

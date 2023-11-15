@@ -6,6 +6,7 @@ import com.rubylichtenstein.cocktails.data.model.Cocktail
 import com.rubylichtenstein.cocktails.data.model.CocktailDetails
 import com.rubylichtenstein.cocktails.data.repository.CocktailsRepository
 import com.rubylichtenstein.cocktails.ui.UiState
+import com.rubylichtenstein.cocktails.ui.asUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -58,9 +59,11 @@ class CocktailsViewModel @Inject constructor(
         }
     }
 
-    val favoriteCocktails: StateFlow<List<Cocktail>> = repository.getFavoriteCocktails().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
+    val favoriteCocktails: StateFlow<UiState<List<Cocktail>>> = repository.getFavoriteCocktails()
+        .asUiState()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = UiState.Loading
+        )
 }

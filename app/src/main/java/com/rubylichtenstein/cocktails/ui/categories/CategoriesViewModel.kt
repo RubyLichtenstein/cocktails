@@ -25,7 +25,7 @@ class CategoriesViewModel @Inject constructor(
         fetchCocktailCategories()
     }
 
-    private fun fetchCocktailCategories() {
+    fun fetchCocktailCategories() {
         viewModelScope.launch {
             _categories.value = UiState.Loading
             try {

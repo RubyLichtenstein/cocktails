@@ -5,23 +5,19 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,12 +41,11 @@ fun CocktailsScreen(
     navController: NavController,
     viewModel: CocktailsViewModel = hiltViewModel()
 ) {
-    val scrollBehavior =
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
         topBar = {
-            LargeTopAppBar(
+            MediumTopAppBar(
                 title = {
                     Text(
                         text = category,
@@ -75,8 +70,9 @@ fun CocktailsScreen(
         }
 
         Box(modifier = Modifier.padding(paddingValues)) {
-            when (val cocktailsState = viewModel.cocktailsByCategory.collectAsStateWithLifecycle().value) {
-                is UiState.Loading -> LoadingView()
+            when (val cocktailsState =
+                viewModel.cocktailsByCategory.collectAsStateWithLifecycle().value) {
+                is UiState.Loading -> CocktailsLoadingView()
                 is UiState.Success -> CocktailList(
                     cocktailsState.data,
                     {
@@ -84,7 +80,8 @@ fun CocktailsScreen(
                     }, navController
                 )
 
-                is UiState.Error -> ErrorView(cocktailsState.message)
+                is UiState.Error -> ErrorView(cocktailsState.message ?: "Error")
+                is UiState.Empty -> TODO()
             }
         }
     }
@@ -96,11 +93,7 @@ fun CocktailList(
     onToggleFavorite: (Cocktail) -> Unit,
     navController: NavController
 ) {
-    val listState = rememberLazyListState()
-
-    LazyColumn(
-        state = listState,
-    ) {
+    LazyColumn {
         items(cocktails) { cocktail ->
             CocktailItem(cocktail, {
                 navController.navigateToDetails(cocktail.idDrink)
@@ -112,9 +105,21 @@ fun CocktailList(
 }
 
 @Composable
-fun LoadingView() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
+fun CocktailsLoadingView() {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        items(3) {
+            ListItem(
+                headlineContent = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .shimmer()
+                            .background(Color.Gray)
+                    )
+                },
+            )
+        }
     }
 }
 
@@ -141,28 +146,24 @@ fun CocktailItem(
             )
         },
         leadingContent = {
+            val size = 56.dp
             Box(
                 Modifier
-                    .size(56.dp)
+                    .size(size)
                     .clip(MaterialTheme.shapes.small),
             ) {
                 SubcomposeAsyncImage(
-                    modifier = Modifier.size(56.dp),
                     model = cocktail.strDrinkThumb,
                     contentDescription = cocktail.strDrink,
                     loading = {
                         Box(
                             modifier = Modifier
-                                .size(56.dp)
-                                .background(Color.Blue)
-                                .shimmer(),
+                                .size(size)
+                                .shimmer()
+                                .background(Color.Gray),
                             contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(56.dp)
-                                    .background(Color.Red)
-                            )
+
                         }
                     }
                 )

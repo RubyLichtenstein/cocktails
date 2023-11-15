@@ -48,7 +48,8 @@ fun DetailsScreen(
     when (cocktailDetails) {
         is UiState.Loading -> LoadingView()
         is UiState.Success -> CocktailDetailView(cocktailDetails.data, navController)
-        is UiState.Error -> ErrorView(cocktailDetails.message)
+        is UiState.Error -> ErrorView(cocktailDetails.message ?: "Error")
+        is UiState.Empty -> TODO()
     }
 }
 
