@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,7 +57,7 @@ fun CocktailsScreen(
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Back",
                         )
                     }
@@ -73,7 +73,7 @@ fun CocktailsScreen(
             when (val cocktailsState =
                 viewModel.cocktailsByCategory.collectAsStateWithLifecycle().value) {
                 is UiState.Loading -> CocktailsLoadingView()
-                is UiState.Success -> CocktailList(
+                is UiState.Success -> CocktailsList(
                     cocktailsState.data,
                     {
                         viewModel.updateFavoriteStatus(it)
@@ -88,18 +88,22 @@ fun CocktailsScreen(
 }
 
 @Composable
-fun CocktailList(
+fun CocktailsList(
     cocktails: List<Cocktail>,
     onToggleFavorite: (Cocktail) -> Unit,
     navController: NavController
 ) {
     LazyColumn {
-        items(cocktails) { cocktail ->
-            CocktailItem(cocktail, {
-                navController.navigateToDetails(cocktail.idDrink)
-            }, {
-                onToggleFavorite(cocktail)
-            })
+        items(
+            cocktails,
+            key = { cocktail -> cocktail.idDrink }
+        ) { cocktail ->
+            CocktailItem(
+                cocktail, {
+                    navController.navigateToDetails(cocktail.idDrink)
+                }, {
+                    onToggleFavorite(cocktail)
+                })
         }
     }
 }

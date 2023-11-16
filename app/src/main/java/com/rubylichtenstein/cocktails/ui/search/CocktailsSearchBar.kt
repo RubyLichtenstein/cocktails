@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,7 +27,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rubylichtenstein.cocktails.ui.UiState
-import com.rubylichtenstein.cocktails.ui.cocktails.CocktailList
+import com.rubylichtenstein.cocktails.ui.cocktails.CocktailsList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -68,7 +68,7 @@ fun CocktailsSearchBar(
                         searchQuery = ""
                     }) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Close icon"
                     )
                 }
@@ -111,7 +111,7 @@ fun CocktailsSearchBar(
 //                LinearProgressIndicator()
             }
 
-            is UiState.Success -> CocktailList(
+            is UiState.Success -> CocktailsList(
                 result.data, {
                     viewModel.updateFavoriteStatus(it)
                 }, navController

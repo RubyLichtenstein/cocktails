@@ -22,7 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rubylichtenstein.cocktails.ui.UiState
-import com.rubylichtenstein.cocktails.ui.cocktails.CocktailList
+import com.rubylichtenstein.cocktails.ui.cocktails.CocktailsList
 import com.rubylichtenstein.cocktails.ui.cocktails.CocktailsLoadingView
 import com.rubylichtenstein.cocktails.ui.cocktails.CocktailsViewModel
 import com.rubylichtenstein.cocktails.ui.search.CocktailsSearchBar
@@ -54,13 +54,15 @@ fun FavoritesScreen(
         Box(modifier = Modifier.padding(it)) {
             when (val state = favorites) {
                 is UiState.Loading -> CocktailsLoadingView()
-                is UiState.Success -> CocktailList(
-                    cocktails = state.data,
-                    {
-                        viewModel.updateFavoriteStatus(it)
-                    },
-                    navController = navController
-                )
+                is UiState.Success -> {
+                    CocktailsList(
+                        cocktails = state.data,
+                        {
+                            viewModel.updateFavoriteStatus(it)
+                        },
+                        navController = navController
+                    )
+                }
 
                 is UiState.Empty -> EmptyFavoritesScreen()
                 is UiState.Error -> TODO()
