@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.rubylichtenstein.cocktails.ui.categories.CategoriesScreen
 import com.rubylichtenstein.cocktails.ui.cocktails.CocktailsScreen
-import com.rubylichtenstein.cocktails.ui.detailes.DetailsScreen
+import com.rubylichtenstein.cocktails.ui.detailes.CocktailDetailsScreen
 import com.rubylichtenstein.cocktails.ui.favorites.FavoritesScreen
 
 @Composable
@@ -38,7 +38,7 @@ fun AppNavigation(navController: NavHostController) {
             arguments = listOf(navArgument("cocktailId") { type = NavType.StringType })
         ) { backStackEntry ->
             val cocktailId = backStackEntry.arguments?.getString("cocktailId") ?: return@composable
-            DetailsScreen(cocktailId, navController)
+            CocktailDetailsScreen(cocktailId, navController)
         }
 
     }

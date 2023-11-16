@@ -6,6 +6,7 @@ import com.rubylichtenstein.cocktails.data.api.RetrofitClient.theCocktailDbServi
 import com.rubylichtenstein.cocktails.data.api.TheCocktailDbService
 import com.rubylichtenstein.cocktails.data.repository.CocktailsRepository
 import com.rubylichtenstein.cocktails.data.room.AppDatabase
+import com.rubylichtenstein.cocktails.data.room.CocktailDetailsDao
 import com.rubylichtenstein.cocktails.data.room.FavoriteCocktailsDao
 import dagger.Module
 import dagger.Provides
@@ -41,8 +42,16 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideCocktailDetailsDao(database: AppDatabase): CocktailDetailsDao {
+        return database.cocktailDetailsDao()
+    }
+
+    @Provides
+    @Singleton
     fun provideCocktailsRepository(
         cocktailsApi: CocktailsApi,
-        favoriteCocktailsDao: FavoriteCocktailsDao
-    ): CocktailsRepository = CocktailsRepository(cocktailsApi, favoriteCocktailsDao)
+        favoriteCocktailsDao: FavoriteCocktailsDao,
+        cocktailDetailsDao: CocktailDetailsDao
+    ): CocktailsRepository =
+        CocktailsRepository(cocktailsApi, favoriteCocktailsDao, cocktailDetailsDao)
 }

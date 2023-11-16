@@ -18,7 +18,7 @@ import com.rubylichtenstein.cocktails.data.model.CocktailDetails
 abstract class AppDatabase : RoomDatabase() {
     abstract fun favoriteCocktailsDao(): FavoriteCocktailsDao
 
-    abstract fun CocktailDetailsDao(): CocktailDetailsDao
+    abstract fun cocktailDetailsDao(): CocktailDetailsDao
 
     companion object {
         @Volatile

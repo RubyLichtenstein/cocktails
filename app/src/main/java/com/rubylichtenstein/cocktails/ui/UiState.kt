@@ -25,3 +25,12 @@ fun <T> Flow<List<T>>.asUiState(
     }.catch {
         emit(UiState.Error(errorMessage ?: it.message))
     }
+
+fun <T> Flow<T>.asUiState(
+    errorMessage: String? = null
+): Flow<UiState<T>> =
+    map<T, UiState<T>> {
+        UiState.Success(it)
+    }.catch {
+        emit(UiState.Error(errorMessage ?: it.message))
+    }
