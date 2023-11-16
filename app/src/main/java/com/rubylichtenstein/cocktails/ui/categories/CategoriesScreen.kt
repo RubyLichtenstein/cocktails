@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
@@ -35,7 +36,6 @@ import com.rubylichtenstein.cocktails.ui.UiState
 import com.rubylichtenstein.cocktails.ui.navigateToCocktails
 import com.rubylichtenstein.cocktails.ui.search.CocktailsSearchBar
 import com.valentinilk.shimmer.shimmer
-
 
 @Composable
 fun CategoriesScreen(
@@ -88,12 +88,17 @@ fun CategoriesScreen(
 fun CategoriesList(categories: List<DrinkCategory>, navController: NavController) {
     LazyColumn {
         items(categories) { category ->
-            ListItem(
-                headlineContent = { Text(category.strCategory) },
-                modifier = Modifier.clickable {
-                    navController.navigateToCocktails(category.strCategory)
-                }
-            )
+            Column {
+                ListItem(
+                    headlineContent = { Text(category.strCategory) },
+                    modifier = Modifier.clickable {
+                        navController.navigateToCocktails(category.strCategory)
+                    }
+                )
+                Divider(modifier = Modifier
+                    .height(1.dp)
+                    .padding(horizontal = 16.dp))
+            }
         }
     }
 }

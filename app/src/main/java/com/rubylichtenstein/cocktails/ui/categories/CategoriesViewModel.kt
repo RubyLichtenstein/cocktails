@@ -16,8 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
     private val repository: CocktailsApi
-) :
-    ViewModel() {
+) : ViewModel() {
     private val _categories = MutableStateFlow<UiState<List<DrinkCategory>>>(UiState.Loading)
     val categories: StateFlow<UiState<List<DrinkCategory>>> = _categories.asStateFlow()
 
