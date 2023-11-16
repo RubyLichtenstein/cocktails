@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.rubylichtenstein.cocktails.data.model.Cocktail
 import com.rubylichtenstein.cocktails.data.repository.CocktailsRepository
 import com.rubylichtenstein.cocktails.ui.UiState
+import com.rubylichtenstein.cocktails.ui.asUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,38 +13,93 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class SearchUiState(
+    val searchResult: UiState<List<Cocktail>>,
+    val searchQuery: String,
+    val isActive: Boolean
+)
+
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val repository: CocktailsRepository
 ) : ViewModel() {
-    private val _searchResults = MutableStateFlow<UiState<List<Cocktail>>>(UiState.Loading)
-    val searchResults: StateFlow<UiState<List<Cocktail>>> = _searchResults
+    private val _uiState = MutableStateFlow(SearchUiState(UiState.Loading, "", false))
+    val uiState: StateFlow<SearchUiState> = _uiState
 
-    fun searchCocktails(query: String, searchInFavorites: Boolean) {
+    private fun searchCocktails(query: String) {
         viewModelScope.launch {
-            try {
-                val response = if (searchInFavorites) {
-                    repository.getFavoriteCocktails().map {
-                        it.filter { cocktail ->
-                            cocktail.strDrink.contains(query, ignoreCase = true)
-                        }
-                    }
-                } else {
-                    repository.searchCocktails(query)
+            repository.searchCocktails(query)
+                .asUiState()
+                .collect {
+                    _uiState.value = _uiState.value.copy(searchResult = it)
                 }
-
-                response.collect {
-                    _searchResults.value = UiState.Success(it)
-                }
-            } catch (e: Exception) {
-                _searchResults.value = UiState.Error(e.message ?: "Unknown error")
-            }
         }
     }
 
-    fun updateFavoriteStatus(cocktail: Cocktail) {
+    private fun searchFavoriteCocktails(query: String) {
+        viewModelScope.launch {
+            repository.getFavoriteCocktails()
+                .map {
+                    it.filter { cocktail ->
+                        cocktail.strDrink.contains(query, ignoreCase = true)
+                    }
+                }
+                .asUiState()
+                .collect {
+                    _uiState.value = _uiState.value.copy(searchResult = it)
+                }
+        }
+    }
+
+    private fun updateFavoriteStatus(cocktail: Cocktail) {
         viewModelScope.launch {
             repository.updateFavoriteStatus(cocktail, !cocktail.isFavorite)
         }
     }
+
+    fun processIntent(intent: SearchIntent) {
+        when (intent) {
+            is SearchIntent.SearchQueryChanged -> {
+                _uiState.value = _uiState.value.copy(searchQuery = intent.query, isActive = true)
+                if (intent.searchFavorites) {
+                    searchFavoriteCocktails(intent.query)
+                } else {
+                    searchCocktails(intent.query)
+                }
+            }
+
+            is SearchIntent.ToggleFavorite -> {
+                updateFavoriteStatus(intent.cocktail)
+            }
+
+            SearchIntent.ClearSearch -> clearSearch()
+
+            is SearchIntent.SetActive -> {
+                _uiState.value = _uiState.value.copy(isActive = intent.isActive)
+            }
+
+            SearchIntent.Refresh -> {
+                if (_uiState.value.searchQuery.isNotBlank()) {
+                    searchCocktails(_uiState.value.searchQuery)
+                }
+            }
+        }
+    }
+
+    private fun clearSearch() {
+        _uiState.value = _uiState.value.copy(searchQuery = "", isActive = false)
+    }
+}
+
+sealed class SearchIntent {
+    data class SearchQueryChanged(
+        val query: String,
+        val searchFavorites: Boolean
+    ) : SearchIntent()
+
+    data class ToggleFavorite(val cocktail: Cocktail) : SearchIntent()
+    data object ClearSearch : SearchIntent()
+
+    data class SetActive(val isActive: Boolean) : SearchIntent()
+    data object Refresh : SearchIntent()
 }

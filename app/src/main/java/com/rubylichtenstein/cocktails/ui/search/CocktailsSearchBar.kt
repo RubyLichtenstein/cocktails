@@ -3,6 +3,7 @@
 package com.rubylichtenstein.cocktails.ui.search
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,17 +11,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,9 +26,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.rubylichtenstein.cocktails.ui.UiState
 import com.rubylichtenstein.cocktails.ui.cocktails.CocktailsList
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun CocktailsSearchBar(
@@ -38,10 +33,9 @@ fun CocktailsSearchBar(
     searchFavorites: Boolean,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
-    var searchQuery by remember { mutableStateOf("") }
-    var isActive by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
-    var searchJob: Job? by remember { mutableStateOf(null) }
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
+    val isActive = uiState.isActive
+    val searchQuery = uiState.searchQuery
 
     SearchBar(
         modifier = Modifier
@@ -51,21 +45,14 @@ fun CocktailsSearchBar(
                 else PaddingValues(horizontal = 8.dp, vertical = 8.dp)
             ),
         query = searchQuery,
-        onQueryChange = {
-            searchQuery = it
-            searchJob?.cancel()
-            searchJob = coroutineScope.launch {
-                delay(500)  // Debounce time in milliseconds
-                viewModel.searchCocktails(searchQuery, searchFavorites)
-            }
+        onQueryChange = { query ->
+            viewModel.processIntent(SearchIntent.SearchQueryChanged(query, searchFavorites))
         },
         leadingIcon = {
             if (isActive) {
-                //back icon here
                 IconButton(
                     onClick = {
-                        isActive = false
-                        searchQuery = ""
+                        viewModel.processIntent(SearchIntent.SetActive(false))
                     }) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
@@ -82,11 +69,7 @@ fun CocktailsSearchBar(
         trailingIcon = {
             if (isActive && searchQuery.isNotEmpty()) {
                 IconButton(onClick = {
-                    if (searchQuery.isNotEmpty()) {
-                        searchQuery = ""
-                    } else {
-                        isActive = false
-                    }
+                    viewModel.processIntent(SearchIntent.ClearSearch)
                 }) {
                     Icon(
                         imageVector = Icons.Default.Close,
@@ -95,9 +78,13 @@ fun CocktailsSearchBar(
                 }
             }
         },
-        onSearch = { viewModel.searchCocktails(it, searchFavorites) },
+        onSearch = { query ->
+            viewModel.processIntent(SearchIntent.SearchQueryChanged(query, searchFavorites))
+        },
         active = isActive,
-        onActiveChange = { isActive = it },
+        onActiveChange = {
+            viewModel.processIntent(SearchIntent.SetActive(it))
+        },
         placeholder = {
             if (searchFavorites) {
                 Text("Search Favorites")
@@ -106,19 +93,29 @@ fun CocktailsSearchBar(
             }
         }
     ) {
-        when (val result = viewModel.searchResults.collectAsStateWithLifecycle().value) {
+        when (val result = uiState.searchResult) {
             is UiState.Loading -> Box(Modifier.fillMaxWidth()) {
-//                LinearProgressIndicator()
+                if (searchQuery.isEmpty()) {
+                } else {
+                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                }
             }
 
             is UiState.Success -> CocktailsList(
                 result.data, {
-                    viewModel.updateFavoriteStatus(it)
-                }, navController
+                    viewModel.processIntent(SearchIntent.ToggleFavorite(it))
+                },
+                navController
             )
 
-            is UiState.Error -> Text("Error: ${result.message}")
-            is UiState.Empty -> TODO()
+            is UiState.Error -> Column {
+                Text("Error searching cocktails")
+                Button(onClick = { viewModel.processIntent(SearchIntent.Refresh) }) {
+                    Text("Refresh")
+                }
+            }
+
+            is UiState.Empty -> Text(text = "Not found")
         }
     }
 }

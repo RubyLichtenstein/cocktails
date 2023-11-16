@@ -7,7 +7,6 @@ import com.rubylichtenstein.cocktails.data.room.CocktailDetailsDao
 import com.rubylichtenstein.cocktails.data.room.FavoriteCocktailsDao
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 
@@ -17,14 +16,15 @@ class CocktailsRepository(
     private val cocktailDetailsDao: CocktailDetailsDao
 ) {
 
-    suspend fun searchCocktails(searchTerm: String): Flow<List<Cocktail>> = flow {
-        val cocktails = cocktailsApi.searchCocktails(searchTerm)
-        val favoriteIds = favoriteCocktailsDao.getAllFavorites().first().map { it.idDrink }
-        val updatedCocktails = cocktails.map { cocktail ->
-            cocktail.copy(isFavorite = favoriteIds.contains(cocktail.idDrink))
+    suspend fun searchCocktails(searchTerm: String): Flow<List<Cocktail>> =
+        flow {
+            emit(cocktailsApi.searchCocktails(searchTerm))
+        }.combine(favoriteCocktailsDao.getAllFavorites()) { cocktails, favorites ->
+            val favoriteIds = favorites.map { it.idDrink }.toSet()
+            cocktails.map { cocktail ->
+                cocktail.copy(isFavorite = favoriteIds.contains(cocktail.idDrink))
+            }
         }
-        emit(updatedCocktails)
-    }
 
     fun getCocktailDetails(id: String): Flow<CocktailDetails> = flow {
         val localData = cocktailDetailsDao.getCocktailById(id).firstOrNull()
