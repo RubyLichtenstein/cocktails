@@ -34,7 +34,7 @@ import androidx.navigation.NavController
 import com.rubylichtenstein.cocktails.data.DrinkCategory
 import com.rubylichtenstein.cocktails.ui.UiState
 import com.rubylichtenstein.cocktails.ui.navigateToCocktails
-import com.rubylichtenstein.cocktails.ui.search.CocktailsSearchBar
+import com.rubylichtenstein.cocktails.ui.search.AllCocktailsSearchBar
 import com.valentinilk.shimmer.shimmer
 
 @Composable
@@ -50,9 +50,8 @@ fun CategoriesScreen(
     Scaffold(
         topBar = {
             Column {
-                CocktailsSearchBar(
-                    navController = navController,
-                    searchFavorites = false
+                AllCocktailsSearchBar(
+                    navController = navController
                 )
                 TopAppBar(
                     title = {
@@ -78,7 +77,11 @@ fun CategoriesScreen(
                     onRetry = { viewModel.fetchCocktailCategories() }
                 )
 
-                is UiState.Empty -> TODO()
+                is UiState.Empty -> Box {
+                    Text("No categories found :(")
+                }
+
+                UiState.Initial -> Box {}
             }
         }
     }
@@ -95,9 +98,11 @@ fun CategoriesList(categories: List<DrinkCategory>, navController: NavController
                         navController.navigateToCocktails(category.strCategory)
                     }
                 )
-                Divider(modifier = Modifier
-                    .height(1.dp)
-                    .padding(horizontal = 16.dp))
+                Divider(
+                    modifier = Modifier
+                        .height(1.dp)
+                        .padding(horizontal = 16.dp)
+                )
             }
         }
     }

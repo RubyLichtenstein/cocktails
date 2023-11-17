@@ -1,20 +1,15 @@
 package com.rubylichtenstein.cocktails.ui.cocktails
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rubylichtenstein.cocktails.data.model.Cocktail
-import com.rubylichtenstein.cocktails.data.model.CocktailDetails
 import com.rubylichtenstein.cocktails.data.repository.CocktailsRepository
 import com.rubylichtenstein.cocktails.ui.UiState
 import com.rubylichtenstein.cocktails.ui.asUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,12 +34,4 @@ class CocktailsViewModel @Inject constructor(
             repository.updateFavoriteStatus(cocktail, !cocktail.isFavorite)
         }
     }
-
-    val favoriteCocktails: StateFlow<UiState<List<Cocktail>>> = repository.getFavoriteCocktails()
-        .asUiState()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = UiState.Loading
-        )
 }

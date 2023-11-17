@@ -3,12 +3,14 @@ package com.rubylichtenstein.cocktails.ui.cocktails
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -24,11 +26,44 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import com.rubylichtenstein.cocktails.data.model.Cocktail
+import com.rubylichtenstein.cocktails.ui.UiState
+import com.rubylichtenstein.cocktails.ui.favorites.EmptyScreen
 import com.rubylichtenstein.cocktails.ui.navigateToDetails
 import com.valentinilk.shimmer.shimmer
 
 @Composable
-fun CocktailsList(
+fun CocktailList(
+    cocktails: UiState<List<Cocktail>>,
+    onToggleFavorite: (Cocktail) -> Unit,
+    onRefresh: () -> Unit,
+    navController: NavController,
+    emptyMessage: String,
+    errorMessage: String,
+) {
+    when (cocktails) {
+        is UiState.Loading -> CocktailsLoadingView()
+        is UiState.Success -> CocktailsLazyColumn(
+            cocktails = cocktails.data,
+            onToggleFavorite,
+            navController = navController
+        )
+
+        is UiState.Empty -> EmptyScreen(emptyMessage)
+        is UiState.Error -> Box {
+            Column(Modifier.align(Alignment.Center)) {
+                Text(errorMessage)
+                Button(onClick = onRefresh) {
+                    Text("Refresh")
+                }
+            }
+        }
+
+        UiState.Initial -> Box {}
+    }
+}
+
+@Composable
+private fun CocktailsLazyColumn(
     cocktails: List<Cocktail>,
     onToggleFavorite: (Cocktail) -> Unit,
     navController: NavController

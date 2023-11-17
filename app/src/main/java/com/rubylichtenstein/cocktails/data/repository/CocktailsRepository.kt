@@ -17,14 +17,14 @@ class CocktailsRepository(
 ) {
 
     suspend fun searchCocktails(searchTerm: String): Flow<List<Cocktail>> =
-        flow {
-            emit(cocktailsApi.searchCocktails(searchTerm))
-        }.combine(favoriteCocktailsDao.getAllFavorites()) { cocktails, favorites ->
-            val favoriteIds = favorites.map { it.idDrink }.toSet()
-            cocktails.map { cocktail ->
-                cocktail.copy(isFavorite = favoriteIds.contains(cocktail.idDrink))
+        flow { emit(cocktailsApi.searchCocktails(searchTerm)) }
+            .combine(favoriteCocktailsDao.getAllFavorites()) { cocktails, favorites ->
+                val favoriteIds = favorites.map { it.idDrink }.toSet()
+                cocktails.map { cocktail ->
+                    val isFavorite = favoriteIds.contains(cocktail.idDrink)
+                    cocktail.copy(isFavorite = isFavorite)
+                }
             }
-        }
 
     fun getCocktailDetails(id: String): Flow<CocktailDetails> = flow {
         val localData = cocktailDetailsDao.getCocktailById(id).firstOrNull()
@@ -41,30 +41,27 @@ class CocktailsRepository(
     }
 
 
-    private suspend fun fetchAndSaveCocktailDetails(id: String): CocktailDetails {
+    private suspend fun fetchAndSaveCocktailDetails(id: String) {
         val cocktailDetails = cocktailsApi.getCocktailDetails(id).firstOrNull()
             ?: error("Cocktail not found")
-        val favoriteIds = favoriteCocktailsDao.isFavorite(id).firstOrNull() ?: false
-        val copy = cocktailDetails.copy(isFavorite = favoriteIds)
+        val isFavorite = favoriteCocktailsDao.isFavorite(id).firstOrNull() ?: false
+        val copy = cocktailDetails.copy(isFavorite = isFavorite)
         cocktailDetailsDao.insertAll(copy)
-        return copy
     }
 
     suspend fun updateFavoriteStatus(cocktail: Cocktail, isFavorite: Boolean) {
         cocktailDetailsDao.updateFavoriteStatus(cocktail.idDrink, isFavorite)
         if (isFavorite) {
             favoriteCocktailsDao.addFavorite(cocktail.copy(isFavorite = true))
-            cocktailDetailsDao.updateFavoriteStatus(cocktail.idDrink, true)
         } else {
             favoriteCocktailsDao.removeFavorite(cocktail)
-            cocktailDetailsDao.updateFavoriteStatus(cocktail.idDrink, false)
         }
     }
 
     fun getCocktailsByCategory(category: String): Flow<List<Cocktail>> =
         flow { emit(cocktailsApi.getCocktailsByCategory(category)) }
             .combine(favoriteCocktailsDao.getAllFavorites()) { cocktails, favorites ->
-                val favoriteIds = favorites.map { it.idDrink }
+                val favoriteIds = favorites.map { it.idDrink }.toSet()
                 cocktails.map { cocktail ->
                     cocktail.copy(isFavorite = favoriteIds.contains(cocktail.idDrink))
                 }

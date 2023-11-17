@@ -14,12 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rubylichtenstein.cocktails.ui.UiState
-import com.rubylichtenstein.cocktails.ui.cocktails.CocktailsViewModel
 
 
 @Composable
 fun FavoriteCountBadge() {
-    val favoritesViewModel: CocktailsViewModel = hiltViewModel()
+    val favoritesViewModel: FavoritesViewModel = hiltViewModel()
     val favorites = favoritesViewModel.favoriteCocktails.collectAsStateWithLifecycle()
     val value = favorites.value
     val favoriteCount = if (value is UiState.Success) {

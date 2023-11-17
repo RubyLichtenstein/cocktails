@@ -62,7 +62,7 @@ fun CocktailDetailsScreen(
     }
 
     when (cocktailDetails) {
-        is UiState.Loading -> LoadingView()
+        is UiState.Loading -> CocktailDetailsLoader()
         is UiState.Success -> CocktailDetailView(
             cocktailDetails.data,
             navController,
@@ -76,8 +76,12 @@ fun CocktailDetailsScreen(
                 viewModel.updateFavoriteStatus(cocktail)
             })
 
-        is UiState.Error -> ErrorView(cocktailDetails.message ?: "Error")
-        is UiState.Empty -> TODO()
+        is UiState.Error -> {
+            //todo add retry button
+            ErrorView(cocktailDetails.message ?: "Error")
+        }
+        is UiState.Empty -> Box { }
+        UiState.Initial -> Box { }
     }
 }
 
@@ -215,7 +219,7 @@ fun CocktailIngredients(cocktail: CocktailDetails) {
 }
 
 @Composable
-fun LoadingView() {
+fun CocktailDetailsLoader() {
     Scaffold {
         Box(
             modifier = Modifier.padding(it),

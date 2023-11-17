@@ -1,32 +1,23 @@
 package com.rubylichtenstein.cocktails.ui.cocktails
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.rubylichtenstein.cocktails.ui.UiState
-import com.valentinilk.shimmer.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +28,12 @@ fun CocktailsScreen(
 ) {
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+
+    val cocktailsState by viewModel.cocktailsByCategory.collectAsStateWithLifecycle()
+
+    LaunchedEffect(category) {
+        viewModel.fetchCocktailsByCategory(category)
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -49,10 +46,6 @@ fun CocktailsScreen(
                         overflow = TextOverflow.Ellipsis,
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
@@ -65,52 +58,18 @@ fun CocktailsScreen(
             )
         }
     ) { paddingValues ->
-        LaunchedEffect(category) {
-            viewModel.fetchCocktailsByCategory(category)
-        }
-
         Box(modifier = Modifier.padding(paddingValues)) {
-            when (val cocktailsState =
-                viewModel.cocktailsByCategory.collectAsStateWithLifecycle().value) {
-                is UiState.Loading -> CocktailsLoadingView()
-                is UiState.Success -> CocktailsList(
-                    cocktailsState.data,
-                    {
-                        viewModel.updateFavoriteStatus(it)
-                    }, navController
-                )
-
-                is UiState.Error -> ErrorView(cocktailsState.message ?: "Error")
-                is UiState.Empty -> TODO()
-            }
-        }
-    }
-}
-
-
-@Composable
-fun CocktailsLoadingView() {
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(3) {
-            ListItem(
-                headlineContent = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .shimmer()
-                            .background(Color.Gray)
-                    )
-                },
+            CocktailList(
+                cocktails = cocktailsState,
+                onToggleFavorite = viewModel::updateFavoriteStatus,
+                navController = navController,
+                onRefresh = { viewModel.fetchCocktailsByCategory(category) },
+                emptyMessage = "No cocktails found for this category",
+                errorMessage = "Error fetching cocktails"
             )
         }
     }
 }
 
-@Composable
-fun ErrorView(errorMessage: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "Error: $errorMessage")
-    }
-}
+
 
