@@ -50,8 +50,12 @@ fun FavoritesScreen(
         Box(modifier = Modifier.padding(it)) {
             CocktailList(
                 cocktails = favorites,
-                onToggleFavorite = viewModel::updateFavoriteStatus,
-                onRefresh = viewModel::fetchFavorites,
+                onToggleFavorite = {
+                    viewModel.processIntents(FavoritesViewModel.Intents.UpdateFavoriteStatus(it))
+                },
+                onRefresh = {
+                    viewModel.processIntents(FavoritesViewModel.Intents.FetchFavorites)
+                },
                 navController = navController,
                 emptyMessage = "No favorites yet, add some by clicking the heart icon",
                 errorMessage = "Error fetching favorites"

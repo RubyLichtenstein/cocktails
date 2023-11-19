@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.rubylichtenstein.cocktails.data.DrinkCategory
+import com.rubylichtenstein.cocktails.data.model.Category
 import com.rubylichtenstein.cocktails.ui.UiState
 import com.rubylichtenstein.cocktails.ui.navigateToCocktails
 import com.rubylichtenstein.cocktails.ui.search.AllCocktailsSearchBar
@@ -88,7 +88,7 @@ fun CategoriesScreen(
 }
 
 @Composable
-fun CategoriesList(categories: List<DrinkCategory>, navController: NavController) {
+fun CategoriesList(categories: List<Category>, navController: NavController) {
     LazyColumn {
         items(categories) { category ->
             Column {

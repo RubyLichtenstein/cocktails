@@ -3,7 +3,7 @@ package com.rubylichtenstein.cocktails.ui.categories
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rubylichtenstein.cocktails.data.api.CocktailsApi
-import com.rubylichtenstein.cocktails.data.DrinkCategory
+import com.rubylichtenstein.cocktails.data.model.Category
 import com.rubylichtenstein.cocktails.ui.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,8 +17,8 @@ import javax.inject.Inject
 class CategoriesViewModel @Inject constructor(
     private val repository: CocktailsApi
 ) : ViewModel() {
-    private val _categories = MutableStateFlow<UiState<List<DrinkCategory>>>(UiState.Loading)
-    val categories: StateFlow<UiState<List<DrinkCategory>>> = _categories.asStateFlow()
+    private val _categories = MutableStateFlow<UiState<List<Category>>>(UiState.Loading)
+    val categories: StateFlow<UiState<List<Category>>> = _categories.asStateFlow()
 
     init {
         fetchCocktailCategories()

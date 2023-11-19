@@ -32,7 +32,11 @@ fun CocktailsScreen(
     val cocktailsState by viewModel.cocktailsByCategory.collectAsStateWithLifecycle()
 
     LaunchedEffect(category) {
-        viewModel.fetchCocktailsByCategory(category)
+        viewModel.processIntents(
+            CocktailsViewModel.Intents.FetchCocktailsByCategory(
+                category
+            )
+        )
     }
 
     Scaffold(
@@ -61,9 +65,17 @@ fun CocktailsScreen(
         Box(modifier = Modifier.padding(paddingValues)) {
             CocktailList(
                 cocktails = cocktailsState,
-                onToggleFavorite = viewModel::updateFavoriteStatus,
+                onToggleFavorite = {
+                    viewModel.processIntents(CocktailsViewModel.Intents.UpdateFavoriteStatus(it))
+                },
                 navController = navController,
-                onRefresh = { viewModel.fetchCocktailsByCategory(category) },
+                onRefresh = {
+                    viewModel.processIntents(
+                        CocktailsViewModel.Intents.FetchCocktailsByCategory(
+                            category
+                        )
+                    )
+                },
                 emptyMessage = "No cocktails found for this category",
                 errorMessage = "Error fetching cocktails"
             )

@@ -2,11 +2,11 @@
 
 package com.rubylichtenstein.cocktails.ui.search
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rubylichtenstein.cocktails.data.model.Cocktail
 import com.rubylichtenstein.cocktails.data.repository.CocktailsRepository
 import com.rubylichtenstein.cocktails.ui.UiState
+import com.rubylichtenstein.cocktails.ui.base.CocktailsBaseViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 
 abstract class BaseSearchViewModel(
     protected val repository: CocktailsRepository
-) : ViewModel() {
+) : CocktailsBaseViewModel(repository) {
     protected val _uiState = MutableStateFlow(
         SearchUiState(
             searchResult = UiState.Initial,
@@ -42,12 +42,6 @@ abstract class BaseSearchViewModel(
     }
 
     abstract fun searchCocktails(query: String)
-
-    protected fun updateFavoriteStatus(cocktail: Cocktail) {
-        viewModelScope.launch {
-            repository.updateFavoriteStatus(cocktail, !cocktail.isFavorite)
-        }
-    }
 
     private fun clearSearch() {
         _uiState.value = _uiState.value.copy(

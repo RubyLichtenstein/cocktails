@@ -3,6 +3,10 @@ package com.rubylichtenstein.cocktails.data.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+data class CocktailDetailResponse(
+    val drinks: List<CocktailDetails>
+)
+
 @Entity(tableName = "cocktail_details")
 data class CocktailDetails(
     @PrimaryKey val idDrink: String,

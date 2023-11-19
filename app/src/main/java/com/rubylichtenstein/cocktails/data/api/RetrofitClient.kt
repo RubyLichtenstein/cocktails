@@ -7,7 +7,8 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
-    private const val BASE_URL = "https://www.thecocktaildb.com/api/json/v1/1/"
+    private const val API_KEY = "1"
+    private const val BASE_URL = "https://www.thecocktaildb.com/api/json/v1/$API_KEY/"
 
     private val okHttpClient: OkHttpClient by lazy {
         val logging = HttpLoggingInterceptor()

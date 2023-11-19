@@ -44,10 +44,6 @@ fun AppNavigation(navController: NavHostController) {
     }
 }
 
-fun NavController.navigateToCategories() {
-    navigate("categories")
-}
-
 fun NavController.navigateToDetails(cocktailId: String) {
     navigate("details/$cocktailId")
 }

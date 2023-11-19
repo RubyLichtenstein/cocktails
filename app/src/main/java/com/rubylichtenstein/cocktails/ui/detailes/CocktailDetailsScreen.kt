@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.material.icons.filled.LocalDrink
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -47,6 +48,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.rubylichtenstein.cocktails.data.model.Cocktail
 import com.rubylichtenstein.cocktails.data.model.CocktailDetails
 import com.rubylichtenstein.cocktails.ui.UiState
+import com.rubylichtenstein.cocktails.ui.detailes.CocktailDetailsViewModel.*
 import com.valentinilk.shimmer.shimmer
 
 @Composable
@@ -58,7 +60,7 @@ fun CocktailDetailsScreen(
     val cocktailDetails = viewModel.cocktailDetails.collectAsStateWithLifecycle().value
 
     LaunchedEffect(cocktailId) {
-        viewModel.fetchCocktailDetails(cocktailId)
+        viewModel.processIntents(Intents.FetchCocktailDetails(cocktailId))
     }
 
     when (cocktailDetails) {
@@ -73,13 +75,22 @@ fun CocktailDetailsScreen(
                     strDrinkThumb = cocktailDetails.data.strDrinkThumb,
                     isFavorite = cocktailDetails.data.isFavorite
                 )
-                viewModel.updateFavoriteStatus(cocktail)
+                viewModel.processIntents(Intents.UpdateFavoriteStatus(cocktail))
             })
 
         is UiState.Error -> {
-            //todo add retry button
-            ErrorView(cocktailDetails.message ?: "Error")
+            Box {
+                Column(Modifier.align(Alignment.Center)) {
+                    Text("Error loading cocktail details")
+                    Button(onClick = {
+                        viewModel.processIntents(Intents.FetchCocktailDetails(cocktailId))
+                    }) {
+                        Text("Refresh")
+                    }
+                }
+            }
         }
+
         is UiState.Empty -> Box { }
         UiState.Initial -> Box { }
     }
@@ -228,9 +239,4 @@ fun CocktailDetailsLoader() {
             CircularProgressIndicator()
         }
     }
-}
-
-@Composable
-fun ErrorView(errorMessage: String) {
-    // Error view implementation
 }
