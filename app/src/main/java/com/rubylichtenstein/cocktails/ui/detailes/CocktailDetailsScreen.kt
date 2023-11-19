@@ -1,14 +1,16 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
 package com.rubylichtenstein.cocktails.ui.detailes
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -22,9 +24,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalBar
-import androidx.compose.material.icons.filled.LocalDrink
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,13 +32,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -48,8 +49,8 @@ import coil.compose.SubcomposeAsyncImage
 import com.rubylichtenstein.cocktails.data.model.Cocktail
 import com.rubylichtenstein.cocktails.data.model.CocktailDetails
 import com.rubylichtenstein.cocktails.ui.UiState
-import com.rubylichtenstein.cocktails.ui.detailes.CocktailDetailsViewModel.*
-import com.valentinilk.shimmer.shimmer
+import com.rubylichtenstein.cocktails.ui.common.ErrorView
+import com.rubylichtenstein.cocktails.ui.detailes.CocktailDetailsViewModel.Intents
 
 @Composable
 fun CocktailDetailsScreen(
@@ -78,18 +79,10 @@ fun CocktailDetailsScreen(
                 viewModel.processIntents(Intents.UpdateFavoriteStatus(cocktail))
             })
 
-        is UiState.Error -> {
-            Box {
-                Column(Modifier.align(Alignment.Center)) {
-                    Text("Error loading cocktail details")
-                    Button(onClick = {
-                        viewModel.processIntents(Intents.FetchCocktailDetails(cocktailId))
-                    }) {
-                        Text("Refresh")
-                    }
-                }
-            }
-        }
+        is UiState.Error ->
+            ErrorView(errorMsg = "Error loading cocktail details", onRefresh = {
+                viewModel.processIntents(Intents.FetchCocktailDetails(cocktailId))
+            })
 
         is UiState.Empty -> Box { }
         UiState.Initial -> Box { }
@@ -102,7 +95,11 @@ fun CocktailDetailView(
     navController: NavController,
     onFavoriteClick: () -> Unit
 ) {
+    val scrollBehavior =
+        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             MediumTopAppBar(
                 title = { Text(cocktail.strDrink) },
@@ -124,7 +121,8 @@ fun CocktailDetailView(
                             contentDescription = "Add to Favorites"
                         )
                     }
-                }
+                },
+                scrollBehavior = scrollBehavior,
             )
         }
     ) { padding ->
@@ -134,52 +132,50 @@ fun CocktailDetailView(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            SubcomposeAsyncImage(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .fillMaxWidth(),
-                contentScale = ContentScale.FillWidth,
-                model = cocktail.strDrinkThumb,
-                contentDescription = cocktail.strDrink,
-                loading = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .fillMaxWidth()
-                            .shimmer()
-                            .background(Color.Gray),
-                        contentAlignment = Alignment.Center
-                    ) {
-                    }
-                }
-            )
-
-            Column(modifier = Modifier) {
-                DetailItem(icon = Icons.Default.LocalDrink, label = cocktail.strDrink)
-                DetailItem(icon = Icons.Default.Info, label = cocktail.idDrink)
-                DetailItem(icon = Icons.Default.Category, label = cocktail.strCategory)
-                DetailItem(icon = Icons.Default.LocalBar, label = cocktail.strAlcoholic)
-                DetailItem(icon = Icons.Default.EmojiFoodBeverage, label = cocktail.strGlass)
-            }
-
+            Image(cocktail)
+            Spacer(modifier = Modifier.height(16.dp))
+            CocktailDetails(cocktail)
+            Spacer(modifier = Modifier.height(16.dp))
             CocktailIngredients(cocktail)
         }
     }
 }
 
 @Composable
-fun DetailItem(icon: ImageVector, label: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(vertical = 4.dp)
-    ) {
-        Icon(
-            icon, contentDescription = null, modifier = Modifier
-                .size(24.dp)
-                .padding(end = 8.dp)
-        )
-        Text(label)
+private fun Image(cocktail: CocktailDetails) {
+    SubcomposeAsyncImage(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .fillMaxWidth(),
+        contentScale = ContentScale.FillWidth,
+        model = cocktail.strDrinkThumb,
+        contentDescription = cocktail.strDrink,
+        loading = {
+            DetailsImageLoader()
+        }
+    )
+}
+
+@Composable
+fun CocktailDetails(cocktail: CocktailDetails) {
+    FlowRow(modifier = Modifier) {
+        Chip(icon = Icons.Default.Category, label = cocktail.strCategory)
+        Spacer(modifier = Modifier.size(8.dp))
+        Chip(icon = Icons.Default.LocalBar, label = cocktail.strAlcoholic)
+        Spacer(modifier = Modifier.size(8.dp))
+        Chip(icon = Icons.Default.EmojiFoodBeverage, label = cocktail.strGlass)
+        Spacer(modifier = Modifier.size(8.dp))
+        Chip(icon = Icons.Default.Info, label = cocktail.idDrink)
     }
+}
+
+@Composable
+fun Chip(icon: ImageVector, label: String) {
+    AssistChip(
+        onClick = { },
+        label = { Text(text = label) },
+        leadingIcon = { Icon(imageVector = icon, contentDescription = null) },
+    )
 }
 
 @Composable
@@ -190,7 +186,7 @@ fun CocktailIngredients(cocktail: CocktailDetails) {
     ) {
         Text(
             "Ingredients",
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
@@ -225,18 +221,6 @@ fun CocktailIngredients(cocktail: CocktailDetails) {
                     Text(measure ?: "N/A")
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun CocktailDetailsLoader() {
-    Scaffold {
-        Box(
-            modifier = Modifier.padding(it),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
         }
     }
 }

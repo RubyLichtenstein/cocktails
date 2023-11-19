@@ -3,15 +3,12 @@ package com.rubylichtenstein.cocktails.ui.cocktails
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -28,6 +25,7 @@ import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import com.rubylichtenstein.cocktails.data.model.Cocktail
 import com.rubylichtenstein.cocktails.ui.UiState
+import com.rubylichtenstein.cocktails.ui.common.ErrorView
 import com.rubylichtenstein.cocktails.ui.favorites.EmptyScreen
 import com.rubylichtenstein.cocktails.ui.navigateToDetails
 import com.valentinilk.shimmer.shimmer
@@ -50,18 +48,7 @@ fun CocktailList(
         )
 
         is UiState.Empty -> EmptyScreen(emptyMessage)
-        is UiState.Error -> Box(Modifier.fillMaxSize()) {
-            Column(
-                Modifier
-                    .align(Alignment.Center)
-                    .fillMaxSize(),
-            ) {
-                Text(errorMessage)
-                Button(onClick = onRefresh) {
-                    Text("Refresh")
-                }
-            }
-        }
+        is UiState.Error -> ErrorView(errorMessage, onRefresh)
 
         UiState.Initial -> Box {}
     }
@@ -74,10 +61,7 @@ private fun CocktailsLazyColumn(
     navController: NavController
 ) {
     LazyColumn {
-        items(
-            cocktails,
-            key = { cocktail -> cocktail.idDrink }
-        ) { cocktail ->
+        items(cocktails) { cocktail ->
             CocktailItem(
                 cocktail, {
                     navController.navigateToDetails(cocktail.idDrink)
@@ -106,28 +90,7 @@ fun CocktailItem(
             )
         },
         leadingContent = {
-            val size = 56.dp
-            Box(
-                Modifier
-                    .size(size)
-                    .clip(MaterialTheme.shapes.small),
-            ) {
-                SubcomposeAsyncImage(
-                    model = cocktail.strDrinkThumb + "/preview",
-                    contentDescription = cocktail.strDrink,
-                    loading = {
-                        Box(
-                            modifier = Modifier
-                                .size(size)
-                                .shimmer()
-                                .background(Color.Gray),
-                            contentAlignment = Alignment.Center
-                        ) {
-
-                        }
-                    }
-                )
-            }
+            CocktailThumbnail(cocktail)
         },
         trailingContent = {
             IconButton(onClick = {
@@ -143,4 +106,30 @@ fun CocktailItem(
             }
         }
     )
+}
+
+@Composable
+private fun CocktailThumbnail(cocktail: Cocktail) {
+    val size = 56.dp
+    Box(
+        Modifier
+            .size(size)
+            .clip(MaterialTheme.shapes.small),
+    ) {
+        SubcomposeAsyncImage(
+            model = cocktail.strDrinkThumb + "/preview",
+            contentDescription = cocktail.strDrink,
+            loading = {
+                Box(
+                    modifier = Modifier
+                        .size(size)
+                        .shimmer()
+                        .background(Color.Gray),
+                    contentAlignment = Alignment.Center
+                ) {
+
+                }
+            }
+        )
+    }
 }

@@ -11,7 +11,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -27,16 +27,23 @@ abstract class BaseSearchViewModel(
     )
     val uiState: StateFlow<SearchUiState> = _uiState
 
-    abstract val debounceMillis: Long
+    abstract fun debounceMillis(): Long
 
     init {
         viewModelScope.launch {
             uiState
                 .map { it.searchQuery }
-                .filter { it.isNotBlank() }
-                .debounce(debounceMillis)
-                .collect {
-                    searchCocktails(it)
+                .distinctUntilChanged()
+                .debounce(debounceMillis())
+                .collect { query ->
+                    val isBlank = query.isBlank()
+
+                    _uiState.value = _uiState.value.copy(
+                        searchResult = if (isBlank) UiState.Initial else UiState.Loading
+                    )
+
+                    if (!isBlank)
+                        searchCocktails(query)
                 }
         }
     }
@@ -53,11 +60,8 @@ abstract class BaseSearchViewModel(
     fun processIntent(intent: SearchIntent) {
         when (intent) {
             is SearchIntent.SearchQueryChanged -> {
-                val isBlank = intent.query.isBlank()
                 _uiState.value = _uiState.value.copy(
                     searchQuery = intent.query,
-                    isActive = true,
-                    searchResult = if (isBlank) UiState.Initial else UiState.Loading
                 )
             }
 

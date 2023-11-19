@@ -13,7 +13,7 @@ class SearchFavoriteCocktailsViewModel @Inject constructor(
     repository: CocktailsRepository
 ) : BaseSearchViewModel(repository) {
 
-    override val debounceMillis = 0L
+    override fun debounceMillis() = 0L
 
     override fun searchCocktails(query: String) {
         viewModelScope.launch {
